@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "allowImportingTsExtensions": false,
+        "lib": ["ES2022", "DOM"],
+        "module": "Preserve",
+        "moduleResolution": "Bundler",
+        "noEmit": true,
+        "noUncheckedIndexedAccess": true,
+        "strict": true,
+        "target": "ES2022",
+        "types": ["bun"],
+        "verbatimModuleSyntax": true
+    },
+    "include": ["scripts", "src"]
+}
