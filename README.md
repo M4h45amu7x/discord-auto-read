@@ -43,7 +43,7 @@ Member and user menus reuse an existing one-to-one DM rule. If no DM exists yet,
 
 ## Development
 
-This project uses Bun 1.4.0.
+This project uses Bun 1.4.0 and the official `@betterdiscord/types` package for the BetterDiscord plugin API.
 
 ```sh
 bun install

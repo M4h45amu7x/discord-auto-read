@@ -1,4 +1,3 @@
-import type { BdApiFacade } from "../betterdiscord";
 import { ContextMenuController } from "../context-menus/controller";
 import { createDiagnosticsReport } from "../diagnostics/report";
 import {
@@ -21,7 +20,7 @@ export const ADAPTER_MAX_ATTEMPTS = 30;
 export const RUNTIME_ERROR_COOLDOWN_MS = 30_000;
 
 type AdapterResolver = (
-    api: BdApiFacade,
+    api: BetterDiscord.BdApi,
     options: AdapterResolutionOptions,
 ) => AdapterHealth | Promise<AdapterHealth>;
 
@@ -71,7 +70,7 @@ export class RuntimeController {
     private readonly runtimeListeners = new Set<() => void>();
 
     constructor(
-        private readonly api: BdApiFacade,
+        private readonly api: BetterDiscord.BdApi,
         private readonly settings: SettingsStore,
         options: RuntimeControllerOptions = {},
     ) {

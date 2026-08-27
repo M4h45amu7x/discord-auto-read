@@ -1,4 +1,3 @@
-import type { BdApiFacade } from "../betterdiscord";
 import type { ChannelContext, MentionState, ScopeRef } from "../policy/model";
 import type { AckEntry } from "../scheduler/ack-scheduler";
 
@@ -142,7 +141,7 @@ const SUPPORTED_THREAD_PARENT_TYPES = new Set<number>([
 ]);
 
 export function resolveDiscordAdapter(
-    api: BdApiFacade,
+    api: BetterDiscord.BdApi,
     options: AdapterResolutionOptions = {},
 ): AdapterHealth {
     const dispatcher = asDispatcher(

@@ -1,4 +1,3 @@
-import type { BdApiFacade } from "../betterdiscord";
 import type { ScopeCatalogNode } from "../discord/adapter";
 import type { ScopeRef } from "../policy/model";
 import type { ReconciliationPreview } from "../reconciliation/reconciler";
@@ -13,7 +12,7 @@ import type { SettingsStore } from "../settings/store";
 import { buildScopeTree, filterScopeTree, type ScopeTreeNode } from "./scope-tree";
 
 export interface SettingsPanelDependencies {
-    api: BdApiFacade;
+    api: BetterDiscord.BdApi;
     settings: SettingsStore;
     getRuntimeVersion(): number;
     subscribeRuntime(listener: () => void): () => void;
@@ -173,14 +172,12 @@ export function createSettingsPanel(
                     : [this.renderSpacer(SPACING_8, `${label}-space-${index}`), button],
             );
             return h(
-                Flex,
+                "div",
                 {
                     role: "group",
                     "aria-label": label,
-                    align: Flex.Align.CENTER,
-                    wrap: Flex.Wrap.WRAP,
                 },
-                children,
+                h(Flex, { align: Flex.Align.CENTER, wrap: Flex.Wrap.WRAP }, children),
             );
         }
 
@@ -241,7 +238,6 @@ export function createSettingsPanel(
                         h(SwitchInput, {
                             id: "smart-auto-read-debounce-enabled",
                             value: settings.debounceMs !== 0,
-                            internalState: false,
                             onChange: (value?: boolean) => {
                                 if (typeof value === "boolean") {
                                     this.updateDebounceEnabled(value);
@@ -275,12 +271,12 @@ export function createSettingsPanel(
                         },
                         h(NumberInput, {
                             key: `debounce-${this.state.debounceRevision}`,
-                            value: this.state.debounceDraft,
+                            value: Number(this.state.debounceDraft) || DEFAULT_SETTINGS.debounceMs,
                             disabled: settings.debounceMs === 0,
                             min: 250,
                             max: 30_000,
                             step: 50,
-                            onChange: (value: string | number) => this.updateDebounceDraft(value),
+                            onChange: (value: number) => this.updateDebounceDraft(value),
                         }),
                     ),
                 ),
@@ -301,7 +297,6 @@ export function createSettingsPanel(
                         h(SwitchInput, {
                             id: "smart-auto-read-reconcile-on-start",
                             value: settings.reconcileOnStart,
-                            internalState: false,
                             onChange: (value?: boolean) => {
                                 if (typeof value === "boolean") {
                                     dependencies.settings.patch({ reconcileOnStart: value });
@@ -357,15 +352,11 @@ export function createSettingsPanel(
                 h(
                     Flex,
                     {
-                        role: "group",
-                        "aria-label": "Scope browser",
                         direction: Flex.Direction.VERTICAL,
                     },
                     h(
                         Flex,
                         {
-                            role: "group",
-                            "aria-label": "Scope type",
                             align: Flex.Align.CENTER,
                             wrap: Flex.Wrap.WRAP,
                         },
@@ -375,11 +366,10 @@ export function createSettingsPanel(
                     ),
                     this.renderSpacer(SPACING_8, "scope-browser-tabs-space"),
                     h(
-                        Flex,
+                        "div",
                         {
                             role: "search",
                             "aria-label": "Search scopes",
-                            direction: Flex.Direction.VERTICAL,
                         },
                         h(SearchInput, {
                             defaultValue: "",
@@ -390,12 +380,11 @@ export function createSettingsPanel(
                     ),
                     this.renderSpacer(SPACING_8, "scope-browser-search-space"),
                     h(
-                        Flex,
+                        "div",
                         {
                             role: "region",
                             "aria-label":
                                 this.state.activeTab === "dms" ? "DM scopes" : "Server scopes",
-                            direction: Flex.Direction.VERTICAL,
                         },
                         filtered.length > 0
                             ? filtered.map((node) => this.renderScopeNode(node, 0))
@@ -414,7 +403,6 @@ export function createSettingsPanel(
                 Button,
                 {
                     type: "button",
-                    "aria-pressed": selected,
                     look: selected ? Button.Looks.FILLED : Button.Looks.OUTLINED,
                     color: selected ? Button.Colors.BRAND : Button.Colors.PRIMARY,
                     size: Button.Sizes.SMALL,
@@ -438,11 +426,20 @@ export function createSettingsPanel(
                     SettingItem,
                     {
                         id: `smart-auto-read-scope-${ruleKey(node.scope.scopeType, node.scope.scopeId)}`,
-                        name: this.renderScopeIdentity(node, depth),
+                        name: `${"› ".repeat(depth)}${node.label}`,
                         note: `Effective: ${decisionLabel(node.effectiveDecision)}, mentions ${mentionLabel(node.effectiveMentionPolicy)}`,
                         inline: false,
                     },
-                    this.renderRuleControls(node.scope, node.label, rule),
+                    h(
+                        React.Fragment,
+                        null,
+                        this.renderScopeIdentity(node),
+                        this.renderSpacer(
+                            SPACING_8,
+                            `scope-identity-space-${ruleKey(node.scope.scopeType, node.scope.scopeId)}`,
+                        ),
+                        this.renderRuleControls(node.scope, node.label, rule),
+                    ),
                 ),
                 node.children.length > 0
                     ? node.children.map((child) => this.renderScopeNode(child, depth + 1))
@@ -463,8 +460,6 @@ export function createSettingsPanel(
             return h(
                 Flex,
                 {
-                    role: "group",
-                    "aria-label": `Rule controls for ${label}`,
                     align: Flex.Align.STRETCH,
                     wrap: Flex.Wrap.WRAP,
                 },
@@ -541,23 +536,20 @@ export function createSettingsPanel(
             );
         }
 
-        private renderScopeIdentity(
-            node: ScopeTreeNode,
-            depth: number,
-        ): import("react").ReactElement {
+        private renderScopeIdentity(node: ScopeTreeNode): import("react").ReactElement {
             const kind = scopePresentationKind(node);
-            const label = `${"› ".repeat(depth)}${node.label}`;
             return h(
                 Flex,
                 { align: Flex.Align.CENTER },
                 h(
                     Flex,
                     {
-                        basis: "44px",
+                        basis: "auto",
                         grow: 0,
                         shrink: 0,
                         align: Flex.Align.CENTER,
                         justify: Flex.Justify.CENTER,
+                        style: { width: "44px" },
                     },
                     node.imageUrl
                         ? h("img", {
@@ -582,7 +574,11 @@ export function createSettingsPanel(
                 h(
                     Flex,
                     { direction: Flex.Direction.VERTICAL },
-                    h(Text, { color: Text.Colors.HEADER_PRIMARY, strong: true }, label),
+                    h(
+                        Text,
+                        { color: Text.Colors.HEADER_PRIMARY, strong: true },
+                        scopeKindLabel(kind),
+                    ),
                     h(
                         Text,
                         {
@@ -591,7 +587,7 @@ export function createSettingsPanel(
                             selectable: true,
                             title: node.scope.scopeId,
                         },
-                        `${scopeKindLabel(kind)} ${node.scope.scopeId}`,
+                        node.scope.scopeId,
                     ),
                 ),
             );
@@ -616,8 +612,6 @@ export function createSettingsPanel(
                 h(
                     Flex,
                     {
-                        role: "group",
-                        "aria-label": "Active overrides content",
                         direction: Flex.Direction.VERTICAL,
                     },
                     h(
@@ -638,13 +632,19 @@ export function createSettingsPanel(
                                   {
                                       key,
                                       id: `smart-auto-read-active-${key}`,
-                                      name: this.renderScopeIdentity(node, 0),
+                                      name: node.label,
                                       note: node.resolved
                                           ? "Available in Discord. Changes here update the same stored rule."
                                           : "Unavailable in Discord. Set both choices to Inherit to remove this stored rule.",
                                       inline: false,
                                   },
-                                  this.renderRuleControls(node.scope, node.label, rule),
+                                  h(
+                                      React.Fragment,
+                                      null,
+                                      this.renderScopeIdentity(node),
+                                      this.renderSpacer(SPACING_8, `active-identity-space-${key}`),
+                                      this.renderRuleControls(node.scope, node.label, rule),
+                                  ),
                               );
                           })
                         : h(Text, { color: Text.Colors.MUTED }, "No stored overrides."),
@@ -666,8 +666,6 @@ export function createSettingsPanel(
                 h(
                     Flex,
                     {
-                        role: "group",
-                        "aria-label": "Existing unread messages content",
                         direction: Flex.Direction.VERTICAL,
                     },
                     count === undefined
@@ -726,8 +724,6 @@ export function createSettingsPanel(
                     h(
                         Flex,
                         {
-                            role: "group",
-                            "aria-label": "Settings JSON to import",
                             direction: Flex.Direction.VERTICAL,
                         },
                         h(TextInput, {
@@ -786,8 +782,6 @@ export function createSettingsPanel(
                 h(
                     Flex,
                     {
-                        role: "group",
-                        "aria-label": "Diagnostics content",
                         direction: Flex.Direction.VERTICAL,
                     },
                     h(

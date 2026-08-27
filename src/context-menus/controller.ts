@@ -1,11 +1,3 @@
-import type {
-    BdApiFacade,
-    BoundContextMenuRenderInstance,
-    ContextMenuActionEvent,
-    ContextMenuRadioItem,
-    ContextMenuSubmenuItem,
-    ContextMenuTextItem,
-} from "../betterdiscord";
 import type { DiscordAdapter } from "../discord/adapter";
 import type { ScopeRef } from "../policy/model";
 import { ruleKey, type MentionPolicy, type ReadDecision } from "../settings/model";
@@ -14,7 +6,11 @@ import type { SettingsStore } from "../settings/store";
 const MENU_ID = "smart-auto-read";
 const CATEGORY_CHANNEL_TYPE = 4;
 
-type ContextMenuApi = Pick<BdApiFacade, "ContextMenu"> & Partial<Pick<BdApiFacade, "Logger">>;
+type ContextMenuApi = Pick<BetterDiscord.BdApi, "ContextMenu"> &
+    Partial<Pick<BetterDiscord.BdApi, "Logger">>;
+type ContextMenuPatchCallback = Parameters<BetterDiscord.ContextMenu["patch"]>[1];
+type ContextMenuRenderInstance = Parameters<ContextMenuPatchCallback>[2];
+type ContextMenuActionEvent = Parameters<NonNullable<BetterDiscord.MenuItemRadio["action"]>>[0];
 type ContextMenuAdapter = Pick<DiscordAdapter, "findPrivateChannelIdForUser" | "getChannelContext">;
 
 interface MenuProps extends Record<string, unknown> {
@@ -96,7 +92,7 @@ export class ContextMenuController {
     private appendNativeScopeItem(
         tree: unknown,
         target: MenuTarget,
-        instance?: BoundContextMenuRenderInstance,
+        instance?: ContextMenuRenderInstance,
     ): void {
         const children = menuChildren(tree);
         if (!children || hasSmartAutoReadMenu(children)) {
@@ -109,20 +105,13 @@ export class ContextMenuController {
         );
     }
 
-    private buildSubmenu(target: MenuTarget, refresh: () => void): ContextMenuSubmenuItem {
+    private buildSubmenu(target: MenuTarget, refresh: () => void): BetterDiscord.MenuItemSubmenu {
         if (target.kind === "unavailable-member") {
             return {
                 type: "submenu",
                 id: MENU_ID,
                 label: "Smart Auto Read",
-                items: [
-                    {
-                        type: "group",
-                        items: [
-                            textItem("member-unavailable", "Open a DM with this member first."),
-                        ],
-                    },
-                ],
+                items: [textItem("member-unavailable", "Open a DM with this member first.")],
             };
         }
 
@@ -135,36 +124,27 @@ export class ContextMenuController {
             id: MENU_ID,
             label: "Smart Auto Read",
             items: [
-                {
-                    type: "group",
-                    items: [
-                        textItem(
-                            "read-heading",
-                            "Read behavior",
-                            "Controls whether this scope is marked as read.",
-                        ),
-                        ...readDecisionItems(decision, (event, value) => {
-                            event.preventDefault();
-                            this.updateRule(scope, value, undefined);
-                            refresh();
-                        }),
-                    ],
-                },
-                {
-                    type: "group",
-                    items: [
-                        textItem(
-                            "mention-heading",
-                            "Mention safety",
-                            "Protect keeps mentions unread for this scope.",
-                        ),
-                        ...mentionPolicyItems(mentionPolicy, (event, value) => {
-                            event.preventDefault();
-                            this.updateRule(scope, undefined, value);
-                            refresh();
-                        }),
-                    ],
-                },
+                textItem(
+                    "read-heading",
+                    "Read behavior",
+                    "Controls whether this scope is marked as read.",
+                ),
+                ...readDecisionItems(decision, (event, value) => {
+                    event.preventDefault();
+                    this.updateRule(scope, value, undefined);
+                    refresh();
+                }),
+                { type: "separator" },
+                textItem(
+                    "mention-heading",
+                    "Mention safety",
+                    "Protect keeps mentions unread for this scope.",
+                ),
+                ...mentionPolicyItems(mentionPolicy, (event, value) => {
+                    event.preventDefault();
+                    this.updateRule(scope, undefined, value);
+                    refresh();
+                }),
             ],
         };
     }
@@ -189,7 +169,7 @@ export class ContextMenuController {
         });
     }
 
-    private requestMenuRerender(instance?: BoundContextMenuRenderInstance): void {
+    private requestMenuRerender(instance?: ContextMenuRenderInstance): void {
         if (!instance) {
             return;
         }
@@ -355,9 +335,9 @@ function hasSmartAutoReadMenu(children: readonly unknown[]): boolean {
     );
 }
 
-function textItem(id: string, label: string, subtext?: string): ContextMenuTextItem {
+function textItem(id: string, label: string, subtext?: string): BetterDiscord.MenuItemDefault {
     return {
-        type: "text",
+        type: "item",
         id: `${MENU_ID}-${id}`,
         label,
         ...(subtext ? { subtext } : {}),
@@ -368,7 +348,7 @@ function textItem(id: string, label: string, subtext?: string): ContextMenuTextI
 function readDecisionItems(
     selected: ReadDecision,
     onSelect: (event: ContextMenuActionEvent, value: ReadDecision) => void,
-): readonly ContextMenuRadioItem[] {
+): readonly BetterDiscord.MenuItemRadio[] {
     return [
         radioItem(
             "decision-inherit",
@@ -397,7 +377,7 @@ function readDecisionItems(
 function mentionPolicyItems(
     selected: MentionPolicy,
     onSelect: (event: ContextMenuActionEvent, value: MentionPolicy) => void,
-): readonly ContextMenuRadioItem[] {
+): readonly BetterDiscord.MenuItemRadio[] {
     return [
         radioItem(
             "mention-inherit",
@@ -425,7 +405,7 @@ function radioItem(
     group: string,
     checked: boolean,
     action: (event: ContextMenuActionEvent) => void,
-): ContextMenuRadioItem {
+): BetterDiscord.MenuItemRadio {
     return { type: "radio", id: `${MENU_ID}-${id}`, label, group, checked, action };
 }
 

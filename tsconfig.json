@@ -8,7 +8,7 @@
         "noUncheckedIndexedAccess": true,
         "strict": true,
         "target": "ES2022",
-        "types": ["bun"],
+        "types": ["bun", "@betterdiscord/types"],
         "verbatimModuleSyntax": true
     },
     "include": ["scripts", "src"]

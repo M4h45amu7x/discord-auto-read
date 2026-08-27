@@ -7,6 +7,7 @@ Thanks for considering a contribution.
 - Use Bun 1.4.0.
 - Install the locked dependencies with `bun install --frozen-lockfile`.
 - Run `bun run check` before opening a pull request.
+- Use `@betterdiscord/types` for the public BetterDiscord API. Keep local types limited to Discord internals that BetterDiscord does not expose.
 - Keep internal text and comments concise, clear English.
 - Discuss any new runtime dependency before adding it.
 

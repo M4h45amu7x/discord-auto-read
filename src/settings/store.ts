@@ -1,4 +1,3 @@
-import type { BdApiFacade } from "../betterdiscord";
 import {
     normalizeStoredSettings,
     parseImportedSettings,
@@ -15,7 +14,7 @@ export class SettingsStore {
     private current: Readonly<SettingsV1> = freezeSettings(normalizeStoredSettings(undefined));
     private readonly listeners = new Set<() => void>();
 
-    constructor(private readonly data: BdApiFacade["Data"]) {}
+    constructor(private readonly data: BetterDiscord.BdApi["Data"]) {}
 
     get snapshot(): Readonly<SettingsV1> {
         return this.current;
