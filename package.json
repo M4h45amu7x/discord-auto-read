@@ -22,7 +22,7 @@
         "@betterdiscord/types": "1.14.0",
         "@biomejs/biome": "2.5.10",
         "@types/bun": "1.4.0",
-        "@types/react": "19.2.18",
+        "@types/react": "19.3.0",
         "typescript": "7.0.2"
     }
 }
