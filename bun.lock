@@ -5,7 +5,7 @@
     "": {
       "name": "discord-auto-read",
       "devDependencies": {
-        "@betterdiscord/types": "1.14.0",
+        "@betterdiscord/types": "1.14.3",
         "@biomejs/biome": "2.5.10",
         "@types/bun": "1.4.0",
         "@types/react": "19.2.18",
@@ -14,7 +14,7 @@
     },
   },
   "packages": {
-    "@betterdiscord/types": ["@betterdiscord/types@1.14.0", "", { "dependencies": { "@types/react": "^19.1.2", "@types/react-dom": "^19.1.2", "@types/react-reconciler": "^0.32.0" } }, "sha512-Qqa8AvgDKS0yjTUqv/w27BWlNUm3Uf3+OrQ+VbtuOzwAxL5ioPnsy+t7MrYYaz3DAZ730u1WkQj3E/GMPZMEhQ=="],
+    "@betterdiscord/types": ["@betterdiscord/types@1.14.3", "", { "dependencies": { "@types/react": "^19.1.2", "@types/react-dom": "^19.1.2", "@types/react-reconciler": "^0.32.0" } }, "sha512-I0Vlu6ktQV+LaeYP1l6GwBtupT8723GVA4gvg8kMuykUaGLk7VU/4yEKoT7rsAcv21puxWrKFPTCBPAKee9FOg=="],
 
     "@biomejs/biome": ["@biomejs/biome@2.5.10", "", { "optionalDependencies": { "@biomejs/cli-darwin-arm64": "2.5.10", "@biomejs/cli-darwin-x64": "2.5.10", "@biomejs/cli-linux-arm64": "2.5.10", "@biomejs/cli-linux-arm64-musl": "2.5.10", "@biomejs/cli-linux-x64": "2.5.10", "@biomejs/cli-linux-x64-musl": "2.5.10", "@biomejs/cli-win32-arm64": "2.5.10", "@biomejs/cli-win32-x64": "2.5.10" }, "bin": { "biome": "bin/biome" } }, "sha512-WRKXARA3kTuiV5sxqTpobJ/I0MVd4vk3pOL6wnp5az4LntFIhWTj1RWZq3DI9PCEN3lXcqy7p5aqUHzvq8AXyQ=="],
 
