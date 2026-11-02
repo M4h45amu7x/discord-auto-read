@@ -19,7 +19,7 @@
         "check": "bun run format:check && bun run lint && bun run typecheck && bun run build"
     },
     "devDependencies": {
-        "@betterdiscord/types": "1.14.0",
+        "@betterdiscord/types": "1.14.4",
         "@biomejs/biome": "2.5.10",
         "@types/bun": "1.4.0",
         "@types/react": "19.2.18",
